@@ -78,6 +78,10 @@ const Destroy = async (req, res) => {
     if (!post) {
         return res.status(404).json({ error: "Post not found" })
     }
+
+    // delete in cascade the post comments
+    await Comment.deleteMany({_id: {$in : post.comments}})
+
     res.status(200).json(post)
 }
 
