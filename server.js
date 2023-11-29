@@ -3,6 +3,8 @@ const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
 
+const userRoutes = require('./routes/userRoutes')
+
 // mongoose
 const mongoose = require('mongoose')
 
@@ -19,11 +21,16 @@ app.use(cors(corsOptions))
 app.use(morgan('dev'))
 app.use(express.json())
 
-// routes
+/* APP ROUTES */
 app.get('/', (req, res) => {
     res.json({ message: "Welcome to blog Mania !" })
 })
 
+/* API ROUTES */
+app.use('/api/user', userRoutes)
+
+
+// DB conncetion
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
         app.listen(process.env.PORT, () => console.log('The App is open running on port :', process.env.PORT))
