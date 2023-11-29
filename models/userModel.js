@@ -30,6 +30,30 @@ const userSchema = new Schema({
 
 /* MODEL STATIC METHODS */
 
+// login
+userSchema.statics.login = async function (email, password) {
+    // field required
+    if(!email || !password) {
+        throw Error("Please, fill all fields")
+    }
+
+    // find the user email
+    const user = await this.findOne({email})
+    if(!user) {
+        throw Error("Incorrect email")
+    }
+
+    // match the credentials
+    const match = await bcrypt.compare(password, user.password)
+    if(!match) {
+        throw Error("Invalid credentials !")
+    }
+
+    // if all goes well we should have the user successfully
+    return user
+}
+
+
 // signup
 userSchema.statics.signUp = async function (email, password, firstname, lastname) {
     // verify unique email
