@@ -50,4 +50,16 @@ const signUp = async (req, res) => {
     
 }
 
-module.exports = { login, signUp }
+// user Info 
+const Info = async (req, res) => {
+
+    const user = await User.findOne({_id: req.user._id}).select('-password')
+
+    if(!user) {
+        return res.status(404).json({error: "User not found"})
+    }
+
+    res.status(200).json(user)
+}
+
+module.exports = { login, signUp, Info }

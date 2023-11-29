@@ -4,6 +4,9 @@ const express = require('express')
 // user controller
 const userController = require('../controllers/userController')
 
+// middlewares
+const authMiddleware = require('../middlewares/authMiddleware')
+
 const router = express.Router()
 
 /* USER ROUTES */
@@ -13,5 +16,11 @@ router.post('/login', userController.login)
 
 // signup route
 router.post('/signup', userController.signUp)
+
+// use the auth middleware for the routes down below
+router.use(authMiddleware)
+
+// current user info
+router.post('/', userController.Info)
 
 module.exports = router
