@@ -26,4 +26,7 @@ router.post('/', postController.Store)
 // Delete a post
 router.delete('/:id', postController.Destroy)
 
+// Comment a post
+router.put('/comment/:id', postController.CommentPost)
+
 module.exports = router

@@ -3,14 +3,18 @@ const mongoose = require('mongoose')
 
 // models
 const Post = require('../models/postModel')
-// post validator
+const Comment = require('../models/commentModel')
+
+// validator
 const postValidator = require('../utils/postValidator')
+const commentValidator = require('../utils/commentValidator')
 
 /* CONTROLLER METHODES */
 
 // all posts
 const Index = async (req, res) => {
     const posts = await Post.find()
+        .populate({ path: 'user', select: 'firstname lastname' })
         .sort({ createdAt: -1 })
 
     res.status(200).json(posts)
@@ -26,6 +30,14 @@ const Show = async (req, res) => {
     }
 
     const post = await Post.findOne({ _id: id })
+        .populate([
+            { path: 'user', select: 'firstname lastname' },
+            {
+                path: 'comments',
+                select: 'content -_id user createdAt',
+                populate: { path: 'user', select: 'firstname lastname' }
+            },
+        ])
 
     if (!post) {
         return res.status(400).json({ error: "Post not found" })
@@ -58,20 +70,63 @@ const Store = async (req, res) => {
 const Destroy = async (req, res) => {
     const { id } = req.params
     // verify id format
-    if(!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(404).json({error: "Post not found, invalid id"})
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ error: "Post not found, invalid id" })
     }
 
-    const post = await Post.findOneAndDelete({_id: id})
-    if(!post) {
-        return res.status(404).json({error: "Post not found"})
+    const post = await Post.findOneAndDelete({ _id: id })
+    if (!post) {
+        return res.status(404).json({ error: "Post not found" })
     }
     res.status(200).json(post)
+}
+
+// comment a post
+const CommentPost = async (req, res) => {
+    const { id } = req.params
+    const { content } = req.body
+
+    // verify id format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ error: "Post not found, invalid id" })
+    }
+
+    // find the post
+    const post_exists = await Post.findOne({ _id: id })
+
+    if (!post_exists) {
+        return res.status(404).json({ error: "Post not found" })
+    }
+
+    try {
+        // fields validation
+        commentValidator.validate()
+
+        // save the comment
+        const comment = await Comment.create({
+            content,
+            user: req.user._id,
+            post: post_exists._id
+        })
+
+        // update post comments
+        const post = await Post.findOneAndUpdate({ _id: id }, {
+            comments: [...post_exists.comments, comment._id]
+        })
+
+        // return the comment
+        res.status(200).json(comment)
+
+    } catch (err) {
+        res.status(422).json({ error: err.message })
+    }
+
 }
 
 module.exports = {
     Index,
     Show,
     Store,
-    Destroy
+    Destroy,
+    CommentPost
 }
