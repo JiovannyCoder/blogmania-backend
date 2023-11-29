@@ -4,6 +4,7 @@ const morgan = require('morgan')
 const cors = require('cors')
 
 const userRoutes = require('./routes/userRoutes')
+const postRoutes = require('./routes/postRoutes')
 
 // mongoose
 const mongoose = require('mongoose')
@@ -28,7 +29,7 @@ app.get('/', (req, res) => {
 
 /* API ROUTES */
 app.use('/api/user', userRoutes)
-
+app.use('/api/posts', postRoutes)
 
 // DB conncetion
 mongoose.connect(process.env.MONGO_URI)
