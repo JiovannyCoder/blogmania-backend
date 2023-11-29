@@ -1,10 +1,13 @@
 // express
 const express = require('express')
 
-// user controller
+// post controller
 const postController = require('../controllers/postController')
+// auth middleware
+const authMiddleware = require('../middlewares/authMiddleware')
 
 const router = express.Router()
+
 
 /* POST ROUTES */
 
@@ -13,6 +16,9 @@ router.get('/', postController.Index)
 
 // Single post
 router.get('/:id', postController.Show)
+
+// use the auth middleware for the routes down below
+router.use(authMiddleware)
 
 // Create a post
 router.post('/', postController.Store)
