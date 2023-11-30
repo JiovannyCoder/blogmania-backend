@@ -23,4 +23,7 @@ router.use(authMiddleware)
 // current user info
 router.post('/', userController.Info)
 
+// current user posts
+router.post('/posts', userController.UserPosts)
+
 module.exports = router

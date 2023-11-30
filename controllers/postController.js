@@ -62,7 +62,7 @@ const Store = async (req, res) => {
         res.status(200).json(post)
 
     } catch (err) {
-        res.status(422).json({ error: err.message })
+        res.status(400).json({ error: err.message })
     }
 }
 
@@ -104,7 +104,7 @@ const CommentPost = async (req, res) => {
 
     try {
         // fields validation
-        commentValidator.validate()
+        commentValidator.validate(content)
 
         // save the comment
         const comment = await Comment.create({
@@ -118,11 +118,14 @@ const CommentPost = async (req, res) => {
             comments: [...post_exists.comments, comment._id]
         })
 
+        const formatedComment = await Comment.findOne({_id: comment.id})
+                                            .populate({ path: 'user', select: 'firstname lastname' })
+                                            .select('-updatedAt -_id')
         // return the comment
-        res.status(200).json(comment)
+        res.status(200).json(formatedComment)
 
     } catch (err) {
-        res.status(422).json({ error: err.message })
+        res.status(400).json({ error: err.message })
     }
 
 }
